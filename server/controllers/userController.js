@@ -88,7 +88,7 @@ async function login(req,res){
 
 async function sendMail(req,res){
 
-    const user = User.findOne({email : req.body.email});
+    const user = await User.findOne({email : req.body.email});
 
     if(isEmpty(user)){
         return res.send(generateResponse(404,true,null,"Not Registered With Bill Splitter"));
@@ -108,7 +108,7 @@ async function sendMail(req,res){
         from: 'shubhamthorvefreelance@gmail.com',
         to: req.body.email,
         subject: 'Forgot Password Link',
-        text: "Please find link below to change password<br>"+url+authToken
+        html: "Please find link below to change password<br>"+url+authToken
     };
 
     transporter.sendMail(mailOptions, function(error, info){
@@ -122,6 +122,17 @@ async function sendMail(req,res){
     });
 }
 
+async function changePassword(req,res){
+    const hashedPass = await bcryptLib.generateHashedPassword(req.body.password);
+    const user = await User.findOneAndUpdate({userId : req.body.userId,email : req.body.email},
+        {
+            password : hashedPass
+        },{new : true});
+    winstonLogger.info("Password Updated Successfully");
+    return res.send(generateResponse(200,false,null,"Password Changed Successfully"));
+}
+
 module.exports.createUser = createUser;
 module.exports.login = login;
 module.exports.sendMail = sendMail;
+module.exports.changePassword = changePassword;
