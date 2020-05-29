@@ -1,0 +1,4 @@
+{
+    "Port" : "3000",
+    "mongodbUrl" : "mongodb://localhost/BillSplitter"
+}
