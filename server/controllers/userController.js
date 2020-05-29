@@ -1,11 +1,22 @@
 const shortId = require('shortid');
 const moment = require('moment');
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 
 const { User } = require('../model/user');
 const isEmpty = require('../libs/checkLib');
 const generateResponse = require('../libs/responseLib');
 const bcryptLib = require('../libs/bcryptLib');
 const winstonLogger = require('../libs/winstonLib');
+const url = "http://localhost:4200/auth/changePassword/";
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'shubhamthorvefreelance@gmail.com',
+      pass: process.env.emailPassword
+    }
+  });
 
 
 async function createUser(req,res){
@@ -31,6 +42,8 @@ async function createUser(req,res){
         email : req.body.email,
         password : req.body.password,
         mobile : req.body.mobile,
+        country : req.body.country,
+        countryCode : req.body.countryCode,
         createdOn : moment()
     });
 
@@ -58,7 +71,9 @@ async function login(req,res){
                 lastName : user.lastName,
                 email : user.email,
                 mobile : user.mobile,
-                authToken : token
+                authToken : token,
+                countryCode : user.countryCode,
+                country : user.country
             }
             return res.send(generateResponse(200,false,data,"User Logged In Successfully"));
         }else{
@@ -71,5 +86,42 @@ async function login(req,res){
     }
 }
 
+async function sendMail(req,res){
+
+    const user = User.findOne({email : req.body.email});
+
+    if(isEmpty(user)){
+        return res.send(generateResponse(404,true,null,"Not Registered With Bill Splitter"));
+    }
+
+    const data = {
+        userId : user.userId,
+        firstName : user.firstName,
+        lastName : user.lastName,
+        email : user.email,
+        mobile : user.mobile
+    }
+
+    const authToken = jwt.sign(data,process.env.JWTSECRET,{ expiresIn : '1h'})
+
+    const mailOptions = {
+        from: 'shubhamthorvefreelance@gmail.com',
+        to: req.body.email,
+        subject: 'Forgot Password Link',
+        text: "Please find link below to change password<br>"+url+authToken
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          winstonLogger.error("Sending mail failed");
+          res.send(generateResponse(403,true,null,"Sending mail failed"));
+        } else {
+          winstonLogger.info("Mail sent sunccessfully");
+          res.send(generateResponse(200,false,null,"Mail sent Successfully"));
+        }
+    });
+}
+
 module.exports.createUser = createUser;
 module.exports.login = login;
+module.exports.sendMail = sendMail;

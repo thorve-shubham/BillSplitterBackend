@@ -26,6 +26,14 @@ const userSchema = mongoose.Schema({
         type : String,
         required : true
     },
+    country :{
+        type: String,
+        required : true
+    },
+    countryCode : {
+        type : String,
+        required : true
+    },
     createdOn : {
         type : Date,
         required : true
