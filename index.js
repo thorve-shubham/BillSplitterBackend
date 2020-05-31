@@ -13,6 +13,8 @@ const corsLib = require('./server/libs/corsLib');
 //importing routes
 const users = require('./server/routes/users');
 const tokens = require('./server/routes/tokens');
+const groups = require('./server/routes/groups');
+const expenses = require('./server/routes/expenses');
 
 //loading express
 const app = express();
@@ -25,6 +27,8 @@ app.use(corsLib);
 //routes
 app.use('/user',users);
 app.use('/token',tokens);
+app.use('/group',groups);
+app.use('/expense',expenses);
 
 
 //DB Connect

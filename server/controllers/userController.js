@@ -132,7 +132,16 @@ async function changePassword(req,res){
     return res.send(generateResponse(200,false,null,"Password Changed Successfully"));
 }
 
+async function getUsers(req,res){
+    const users = await User.find().select('userId firstName lastName');
+    if(isEmpty(users)){
+        return res.send(generateResponse(404,true,null,"No Users Found"));
+    }else{
+        return res.send(generateResponse(200,false,users,"Users Found"));
+    }
+}
 module.exports.createUser = createUser;
 module.exports.login = login;
 module.exports.sendMail = sendMail;
 module.exports.changePassword = changePassword;
+module.exports.getUsers = getUsers;
