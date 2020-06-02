@@ -9,12 +9,14 @@ const body_parser = require('body-parser')
 //custom libs
 const winstonLogger = require('./server/libs/winstonLib');
 const corsLib = require('./server/libs/corsLib');
+const socketLib = require('./server/libs/socketLib');
 
 //importing routes
 const users = require('./server/routes/users');
 const tokens = require('./server/routes/tokens');
 const groups = require('./server/routes/groups');
 const expenses = require('./server/routes/expenses');
+const histories = require('./server/routes/histories');
 
 //loading express
 const app = express();
@@ -29,6 +31,7 @@ app.use('/user',users);
 app.use('/token',tokens);
 app.use('/group',groups);
 app.use('/expense',expenses);
+app.use('/history',histories);
 
 
 //DB Connect
@@ -46,3 +49,5 @@ const server = http.createServer(app);
 server.listen(config.get('Port'),()=>{
     winstonLogger.info("Express server started on port "+config.get('Port'));
 });
+
+socketLib(server);

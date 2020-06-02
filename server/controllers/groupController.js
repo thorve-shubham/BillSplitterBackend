@@ -5,6 +5,7 @@ const shortId = require('shortid');
 const winstonLogger = require('../libs/winstonLib');
 const generateResponse = require('../libs/responseLib');
 const isEmpty = require('../libs/checkLib');
+const history = require('../libs/historyLib.js');
 
 async function createGroup(req,res){
     const createdBy = await User.findOne({userId : req.body.createdBy}).select('userId firstName lastName');
@@ -28,11 +29,21 @@ async function createGroup(req,res){
     await group.save();
     group.toObject();
     winstonLogger.info("Group Created Successfully");
-    return res.send(generateResponse(200,false,group,"Group Created Successfully"));
+
+    let historydata = {
+        groupId : group.groupId,
+        message : req.body.userName+" Created Group named : "+group.groupName
+    }
+
+    if(await history(historydata)){
+        return res.send(generateResponse(200,false,group,"Group Created Successfully"));
+    }
+
+    //add history
 }
 
 async function getByUserId(req,res){
-    const groups = await Group.find({'members.userId' : req.body.userId});
+    const groups = await Group.find({'members.userId' : req.body.userId}).sort({ createdOn : -1});
 
     if(isEmpty(groups)){
         return res.send(generateResponse(404,true,null,"No Groups Found"));
@@ -43,7 +54,7 @@ async function getByUserId(req,res){
 }
 
 async function getByGroupId(req,res){
-    const group = await Group.findOne({groupId : req.body.groupId});
+    const group = await Group.findOne({groupId : req.body.groupId}).sort({createdOn : -1});
 
     if(isEmpty(group)){
         return res.send(generateResponse(404,true,null,"No Group Found"));

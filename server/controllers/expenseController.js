@@ -1,9 +1,33 @@
 const { Expense } = require('../model/expense');
 const shortId = require('shortid');
 const { User } = require('../model/user');
+const  { Group } = require('../model/group');
 const winstonLogger = require('../libs/winstonLib');
 const generateResponse = require('../libs/responseLib');
 const isEmpty = require('../libs/checkLib');
+const history = require('../libs/historyLib');
+const email = require('../libs/emailLib');
+const { retrieveEmails } = require('../libs/retrieveEmails');
+
+// async function retreiveEmails(expense){
+
+//     const groupMembers = await Group.findOne({groupId : expense.groupId}).select('members groupName');
+ 
+//     let members = []
+ 
+//     for(let member of groupMembers.members){
+//         members.push(member.userId);
+//     }
+ 
+//     const users = await User.find({userId : { $in : members}}).select('email');
+ 
+//     let emails = [];
+ 
+//     for(let user of users){
+//         emails.push(user.email);
+//     }
+//     return {emails : emails, groupName : groupMembers.groupName};
+// }
 
 async function createExpense(req,res){
 
@@ -28,12 +52,26 @@ async function createExpense(req,res){
    }
 
    await expense.save();
+
+   const data = await retrieveEmails(expense.toObject());
+
    winstonLogger.info("Expense Created Successfully");
-   return res.send(generateResponse(200,false,null,"Expense Created Successfully"));
+   let historydata = {
+       expenseId : expense.expenseId,
+       groupId : expense.groupId,
+       message : req.body.userName+" Created an expense named : "+expense.expenseName
+   }
+
+   let msg = req.body.userName+" Created an expense named : "+expense.expenseName+"<br/>"+"Group Name : "+data.groupName+"<br/>";
+
+   if(await history(historydata) && email.sendMail(data.emails,"Bill Splitter Update",msg)){
+    return res.send(generateResponse(200,false,expense.toObject(),"Expense Created Successfully"));
+   }
+   //add histry
 }
 
 async function getByGroupId(req,res){
-    const expenses = await Expense.find({groupId : req.body.groupId});
+    const expenses = await Expense.find({groupId : req.body.groupId}).sort({createdOn : -1});
     if(isEmpty(expenses)){
         return res.send(generateResponse(404,true,null,"No Expenses Found for this Group"));
     }else{
@@ -47,12 +85,27 @@ async function deleteExpense(req,res){
     if(isEmpty(expense)){
         return res.send(generateResponse(404,true,null,"Expense Not Found"));
     }else{
-        return res.send(generateResponse(200,false,null,"Deleted Successfully"));
+
+        const data = await retrieveEmails(expense.toObject());
+
+        let historydata = {
+            expenseId : expense.expenseId,
+            groupId : expense.groupId,
+            message : req.body.userName+" Deleted an expense named : "+expense.expenseName
+        }
+
+        let Msg = req.body.userName+" Deleted an expense named : "+expense.expenseName+"<br/>"+"Group Name : "+data.groupName+"<br/>";
+
+        if(await history(historydata) && email.sendMail(data.emails,"Bill Splitter Update",Msg)){
+            return res.send(generateResponse(200,false,expense.toObject(),"Deleted Successfully"));
+        }
+        
     }
+    //add history
 }
 
 async function getExpenseById(req,res){
-    const expense = await Expense.findOne({expenseId : req.body.expenseId});
+    const expense = await Expense.findOne({expenseId : req.body.expenseId}).sort({createdOn : -1});
 
     if(isEmpty(expense)){
         return res.send(generateResponse(404,true,null,"Expense Not Found"));
@@ -73,13 +126,13 @@ async function updateExpense(req,res){
     
     for(let x of members){
         console.log(x);
-        msg +=x.firstName+" "+x.lastName+"\n";
+        msg +=x.firstName+" "+x.lastName+"<br/>";
     }
     console.log(msg);
-    let msg1 = req.body.userWhoModified+" Updated Expense : "+req.body.expenseName+" as Follows\n";
-    let msg2 = "Expense Amount : from :"+expense.expenseAmount+" to : "+req.body.expenseAmount+"\n";
-    let msg3 = "Paid By : From : "+expense.paidBy.userName+" To : "+paidBy.firstName+" "+paidBy.lastName+"\n";
-    let msg4 = "Updated Members :\n"+msg;
+    let msg1 = req.body.userWhoModified+" Updated Expense : "+req.body.expenseName+" as Follows<br/>";
+    let msg2 = "Expense Amount : from :"+expense.expenseAmount+" to : "+req.body.expenseAmount+"<br/>";
+    let msg3 = "Paid By : From : "+expense.paidBy.userName+" To : "+paidBy.firstName+" "+paidBy.lastName+"<br/>";
+    let msg4 = "Updated Members :<br/>"+msg;
 
     if(req.body.expenseAmount != expense.expenseAmount){
         expense.expenseAmount = req.body.expenseAmount;
@@ -98,9 +151,21 @@ async function updateExpense(req,res){
 
     await expense.save();
 
-    winstonLogger.info("Expense Updated Successfully");
-    return res.send(generateResponse(200,false,expense.toObject(),msg1));
+    const data = await retrieveEmails(expense.toObject());
 
+    winstonLogger.info("Expense Updated Successfully");
+
+    let historydata = {
+        expenseId : expense.expenseId,
+        groupId : expense.groupId,
+        message : msg1
+    }
+
+    let Msg = expense.expenseName+" Expense got Updated By User : <br/><h3>"+req.body.userWhoModified+"</h3><br/>"+"Group Name : "+data.groupName+"<br/>";
+
+    if(await history(historydata) && email.sendMail(data.emails,"Bill Slitter Update",Msg)){
+        return res.send(generateResponse(200,false,expense.toObject(),msg1));
+    }
 }
 
 module.exports.createExpense = createExpense;
