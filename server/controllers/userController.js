@@ -8,7 +8,7 @@ const isEmpty = require('../libs/checkLib');
 const generateResponse = require('../libs/responseLib');
 const bcryptLib = require('../libs/bcryptLib');
 const winstonLogger = require('../libs/winstonLib');
-const url = "http://localhost:4200/auth/changePassword/";
+const url = "http://shubhamthorvetest.in/auth/changePassword/";
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
