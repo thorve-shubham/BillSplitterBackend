@@ -9,25 +9,6 @@ const history = require('../libs/historyLib');
 const email = require('../libs/emailLib');
 const { retrieveEmails } = require('../libs/retrieveEmails');
 
-// async function retreiveEmails(expense){
-
-//     const groupMembers = await Group.findOne({groupId : expense.groupId}).select('members groupName');
- 
-//     let members = []
- 
-//     for(let member of groupMembers.members){
-//         members.push(member.userId);
-//     }
- 
-//     const users = await User.find({userId : { $in : members}}).select('email');
- 
-//     let emails = [];
- 
-//     for(let user of users){
-//         emails.push(user.email);
-//     }
-//     return {emails : emails, groupName : groupMembers.groupName};
-// }
 
 async function createExpense(req,res){
 
