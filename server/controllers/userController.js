@@ -13,7 +13,7 @@ const url = "http://shubhamthorvetest.in/auth/changePassword/";
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'shubhamthorvefreelance@gmail.com',
+      user: process.env.EMAIL,
       pass: process.env.emailPassword
     }
   });
