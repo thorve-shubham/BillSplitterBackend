@@ -10,6 +10,7 @@ const body_parser = require('body-parser')
 const winstonLogger = require('./server/libs/winstonLib');
 const corsLib = require('./server/libs/corsLib');
 const socketLib = require('./server/libs/socketLib');
+const error = require('./server/middleware/error');
 
 //importing routes
 const users = require('./server/routes/users');
@@ -32,6 +33,8 @@ app.use('/token',tokens);
 app.use('/group',groups);
 app.use('/expense',expenses);
 app.use('/history',histories);
+
+app.use(error);
 
 
 //DB Connect
