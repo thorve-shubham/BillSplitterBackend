@@ -1,5 +1,5 @@
 const isEmpty = require('../libs/checkLib');
-const { generateResponse } = require('../libs/responseLib');
+const generateResponse = require('../libs/responseLib');
 const jwt = require('jsonwebtoken');
 const winLogger = require("../libs/winstonLib");
 
