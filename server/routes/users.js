@@ -9,7 +9,7 @@ router.post('/create',userController.createUser);
 router.post('/login',userController.login);
 router.post('/forgotPassword',userController.sendMail);
 router.post('/changePassword',userController.changePassword);
-router.get('/getUsers',auth,userController.getUsers);
+router.post('/getUsers',auth,userController.getUsers);
 
 
 module.exports = router;
