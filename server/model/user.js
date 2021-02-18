@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const userSchema = mongoose.Schema({
-    userId : {
-        type : String,
-        required : true
-    },
     firstName : {
         type : String,
         required : true
@@ -26,14 +22,6 @@ const userSchema = mongoose.Schema({
         type : String,
         required : true
     },
-    country :{
-        type: String,
-        required : true
-    },
-    countryCode : {
-        type : String,
-        required : true
-    },
     createdOn : {
         type : Date,
         required : true
@@ -44,7 +32,7 @@ userSchema.methods.generateAuthToken = function(){
     const info = {
         exp : Math.floor(Date.now() / 1000) + (60 * 60 * 24),  //1 day
         Data : {
-            userId : this.userId,
+            userId : this._id,
             firstName : this.firstName,
             lastName : this.lastName,
             email : this.email,

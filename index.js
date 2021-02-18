@@ -4,20 +4,16 @@ const config = require('config');
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
-const body_parser = require('body-parser')
+const body_parser = require('body-parser');
 
 //custom libs
 const winstonLogger = require('./server/libs/winstonLib');
 const corsLib = require('./server/libs/corsLib');
-const socketLib = require('./server/libs/socketLib');
-const error = require('./server/middleware/error');
+
 
 //importing routes
 const users = require('./server/routes/users');
-const tokens = require('./server/routes/tokens');
-const groups = require('./server/routes/groups');
-const expenses = require('./server/routes/expenses');
-const histories = require('./server/routes/histories');
+const images = require('./server/routes/images');
 
 //loading express
 const app = express();
@@ -29,13 +25,7 @@ app.use(corsLib);
 
 //routes
 app.use('/user',users);
-app.use('/token',tokens);
-app.use('/group',groups);
-app.use('/expense',expenses);
-app.use('/history',histories);
-
-app.use(error);
-
+app.use('/image',images);
 
 //DB Connect
 mongoose.connect(config.get('mongodbUrl'),{useNewUrlParser : true, useCreateIndex : true, useUnifiedTopology : true})
@@ -53,4 +43,3 @@ server.listen(config.get('Port'),()=>{
     winstonLogger.info("Express server started on port "+config.get('Port'));
 });
 
-socketLib(server);
