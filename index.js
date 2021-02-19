@@ -13,7 +13,8 @@ const corsLib = require('./server/libs/corsLib');
 
 //importing routes
 const users = require('./server/routes/users');
-const images = require('./server/routes/images');
+const images = require('./server/routes/s3');
+const moments = require('./server/routes/moments');
 
 //loading express
 const app = express();
@@ -26,6 +27,7 @@ app.use(corsLib);
 //routes
 app.use('/user',users);
 app.use('/image',images);
+app.use('/moment',moments);
 
 //DB Connect
 mongoose.connect(config.get('mongodbUrl'),{useNewUrlParser : true, useCreateIndex : true, useUnifiedTopology : true})

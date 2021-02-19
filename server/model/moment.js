@@ -7,10 +7,6 @@ const momentSchema = mongoose.Schema({
     },
     moments : {
         type : [new mongoose.Schema({
-            // momentId: {
-            //     type: mongoose.Schema.Types.ObjectId,
-            //     required : true
-            // },
             title : {
                 type :String,
                 required : true
